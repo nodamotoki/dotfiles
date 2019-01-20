@@ -2,6 +2,10 @@
 
 (add-to-list 'load-path (concat user-emacs-directory "elisp"))
 
+
+;; font-lock のレベルを2に下げて速くする
+(setq font-lock-maximum-decoration '((c-mode . 2) (c++-mode . 2)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; テーマの設定
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -742,10 +746,8 @@
 ;;; jumplist
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (require 'jumplist)
-;; (global-set-key (kbd "C-<") 'jumplist-previous)
-;; (global-set-key (kbd "C->") 'jumplist-next)
-(global-set-key (kbd "C-c o") 'jumplist-previous)
-(global-set-key (kbd "C-c i") 'jumplist-next)
+(global-set-key (kbd "C-<") 'jumplist-previous)
+(global-set-key (kbd "C->") 'jumplist-next)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; neotree
@@ -753,6 +755,156 @@
 (global-set-key (kbd "<f8>") 'neotree-toggle)
 
 
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; call external script
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun call-external-script-test0 ()
+  (interactive)
+  (let* ((cur (point)))
+    (message "%d\n" cur)
+    (message "%d\n" (+ cur (skip-chars-backward "_A-Za-z0-9_. \t" (bolp))))
+    ))
+
+(defun call-external-script-test1 ()
+  ;;(interactive "sInput:")
+  (interactive)
+  (let* ((cur (point))
+	 (beg (+ cur (skip-chars-backward "_A-Za-z0-9_. \t" (bolp))))
+	 (end (+ beg (skip-chars-forward  "_A-Za-z0-9_. \t" (eolp))))
+	 (str (buffer-substring-no-properties beg end))
+	 (cmd (concat "~/python/test.py \"" str "\""))
+	 )
+    (save-excursion
+      ;;(message "beg=\"%d\"\nend=\"%d\"\nstring=\"%s\"\n" beg end str)
+      (message (shell-command-to-string cmd))
+      )))
+
+(defun call-external-script-test ()
+  (interactive)
+  (let* (cur beg end str cmd)
+    (save-excursion
+      (setq cur (point))
+      (setq beg (+ cur (skip-chars-backward "_A-Za-z0-9_. \t" (bolp))))
+      (setq end (+ beg (skip-chars-forward  "_A-Za-z0-9_. \t" (eolp))))
+      (setq str (buffer-substring-no-properties beg end))
+      (setq cmd (concat "~/python/test.py \"" str "\""))
+      ;;(message "beg=\"%d\"\nend=\"%d\"\nstring=\"%s\"\n" beg end str)
+      (message (shell-command-to-string cmd))
+      )))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; auto-highlight-symbol.el
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(require 'auto-highlight-symbol)
+(global-auto-highlight-symbol-mode t)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; org-mode
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ;; from URL: http://www.mhatta.org/wp/2018/08/16/org-mode-101-1/
+;; ;; ファイルの場所
+;; (setq org-directory "~/org")
+;; (setq org-default-notes-file "notes.org")
+
+;; ;; org-captureを呼び出すキーシーケンス
+;; (define-key global-map "\C-cm" 'org-capture)
+;; ; Org-captureのテンプレート（メニュー）の設定
+;; (setq org-capture-templates
+;;       '(("n" "Note" entry (file+headline "~/ownCloud/Org/notes.org" "Notes")
+;;          "* %?\nEntered on %U\n %i\n %a")
+;;         ))
+;; ; メモをC-M-^一発で見るための設定
+;; ; https://qiita.com/takaxp/items/0b717ad1d0488b74429d から拝借
+;; (defun show-org-buffer (file)
+;;   "Show an org-file FILE on the current buffer."
+;;   (interactive)
+;;   (if (get-buffer file)
+;;       (let ((buffer (get-buffer file)))
+;;         (switch-to-buffer buffer)
+;;         (message "%s" file))
+;;     (find-file (concat "~/org/" file))))
+;; (global-set-key (kbd "C-M-^") '(lambda () (interactive)
+;;                                  (show-org-buffer "notes.org")))
+
+;; https://qiita.com/takaxp/items/a5a3383d7358c58240d0
+;; スピードコマンド
+;;(setq org-use-speed-commands t)
+
+;; http://kenbell.hatenablog.com/entry/20121116/1353072530
+;; 画像をインラインで表示
+(setq org-startup-with-inline-images t)
+
+;; 見出しの余分な*を消す
+(setq org-hide-leading-stars t)
+
+;; LOGBOOK drawerに時間を格納する
+(setq org-clock-into-drawer t)
+
+;; .orgファイルは自動的にorg-mode
+(add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
+
+;; org-default-notes-fileのディレクトリ
+(setq org-directory "~/org/")
+
+;; org-default-notes-fileのファイル名
+(setq org-default-notes-file "notes.org")
+
+;; org-directory内のファイルすべてからagendaを作成する
+(setq my-org-agenda-dir "~/org/")
+(setq org-agenda-files (list my-org-agenda-dir))
+
+;; TODO状態。 | の右側が未実施で赤く表示される
+(setq org-todo-keywords
+      '((sequence "TODO(t)" "ONGOING(o)" "WAIT(w)" "NOTE(n)"  "|" "DONE(d)" "SOMEDAY(s)" "CANCEL(c)" "FORWARDING(f)")))
+
+;; よく使う TAG のショートカットを設定する
+(setq org-tag-alist '(("org" . ?o) ("idea" . ?i) ("research" . ?r) ("design" . ?d) ("impl" . ?j) ("test" . ?t) ("closing" . ?c)))
+
+;; TAG の右端の位置
+(setq org-tags-column -100)
+
+
+;; DONEの時刻を記録
+(setq org-log-done 'time)
+
+;; C-c C-z のメモなどを LOGBOOK ドロワーの中にいれる
+(setq org-log-into-drawer t)
+
+;; html 出力したとき validate リンクをつけない。
+;;(setq org-export-html-validation-link nil)
+(setq org-html-validation-link nil)
+
+;; ショートカットキー
+;; (global-set-key "\C-cl" 'org-store-link)
+;; (global-set-key "\C-cc" 'org-capture)
+;; (global-set-key "\C-ca" 'org-agenda)
+;; (global-set-key "\C-cb" 'org-iswitchb)
+(global-set-key "\C-col" 'org-store-link)
+(global-set-key "\C-coc" 'org-capture)
+(global-set-key "\C-coa" 'org-agenda)
+(global-set-key "\C-cob" 'org-switchb)
+
+;; capture の設定
+(setq org-capture-templates
+      '(("t" "Task" entry (file+headline "~/org/notes.org" "Tasks") "* TODO %?\n  %U\n  %a\n  %i")
+	("m" "Memo" entry (file+headline "~/org/notes.org" "Memos") "* %?\n  %U\n  %a\n  %i")
+	("i" "Idea" entry (file+headline "~/org/notes.org" "Ideas") "* %?\n  %U\n  %a\n  %i")
+        ))
+
+;; ditaa を有効化する
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((ditaa . t))) ; this line activates ditaa
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; org ファイルのはてな記法への変換用
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Emacs起動時にエラーになるのでコメントアウト
+;;(require 'ox-hatena)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -778,6 +930,7 @@
  '(ediff-odd-diff-A ((t (:background "Grey" :foreground "black"))))
  '(ediff-odd-diff-B ((t (:background "light grey" :foreground "black"))))
  '(ediff-odd-diff-C ((t (:background "Grey" :foreground "black"))))
+ '(font-lock-comment-face ((t (:foreground "#99ee55"))))
  '(helm-buffer-saved-out ((t (:background "grey20" :foreground "brightred"))))
  '(helm-ff-directory ((t (:foreground "color-63"))))
  '(helm-ff-dotted-directory ((t (:background "black" :foreground "cyan"))))
@@ -809,4 +962,4 @@
  '(counsel-gtags-auto-update t)
  '(package-selected-packages
    (quote
-    (ag ggtags neotree avy ivy-hydra hydra ivy counsel-etags counsel-gtags counsel-projectile counsel-pydoc counsel undo-tree package-utils magit jumplist helm-themes helm-swoop helm-rtags helm-migemo helm-gtags helm-flycheck helm-elscreen helm-describe-modes helm-descbinds helm-dash helm-c-moccur helm-bm ace-isearch ac-helm))))
+    (htmlize auto-highlight-symbol ag ggtags neotree avy ivy-hydra hydra ivy counsel-etags counsel-gtags counsel-projectile counsel-pydoc counsel undo-tree package-utils magit jumplist helm-themes helm-swoop helm-rtags helm-migemo helm-gtags helm-flycheck helm-elscreen helm-describe-modes helm-descbinds helm-dash helm-c-moccur helm-bm ace-isearch ac-helm))))
