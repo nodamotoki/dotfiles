@@ -803,32 +803,16 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; org-mode
+;;; python3を使う
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; ;; from URL: http://www.mhatta.org/wp/2018/08/16/org-mode-101-1/
-;; ;; ファイルの場所
-;; (setq org-directory "~/org")
-;; (setq org-default-notes-file "notes.org")
+;;(setq py-python-command "/usr/bin/python3")
 
-;; ;; org-captureを呼び出すキーシーケンス
-;; (define-key global-map "\C-cm" 'org-capture)
-;; ; Org-captureのテンプレート（メニュー）の設定
-;; (setq org-capture-templates
-;;       '(("n" "Note" entry (file+headline "~/ownCloud/Org/notes.org" "Notes")
-;;          "* %?\nEntered on %U\n %i\n %a")
-;;         ))
-;; ; メモをC-M-^一発で見るための設定
-;; ; https://qiita.com/takaxp/items/0b717ad1d0488b74429d から拝借
-;; (defun show-org-buffer (file)
-;;   "Show an org-file FILE on the current buffer."
-;;   (interactive)
-;;   (if (get-buffer file)
-;;       (let ((buffer (get-buffer file)))
-;;         (switch-to-buffer buffer)
-;;         (message "%s" file))
-;;     (find-file (concat "~/org/" file))))
-;; (global-set-key (kbd "C-M-^") '(lambda () (interactive)
-;;                                  (show-org-buffer "notes.org")))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; org-mode
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; markdown への出力を有効化する
+(require 'ox-md)
 
 ;; https://qiita.com/takaxp/items/a5a3383d7358c58240d0
 ;; スピードコマンド
@@ -895,16 +879,30 @@
 	("i" "Idea" entry (file+headline "~/org/notes.org" "Ideas") "* %?\n  %U\n  %a\n  %i")
         ))
 
-;; ditaa を有効化する
+;; python3をつかう
+(setq org-babel-python-command "python3")
+
+;; Babel で有効化する言語を選択
 (org-babel-do-load-languages
  'org-babel-load-languages
- '((ditaa . t))) ; this line activates ditaa
+ '((emacs-lisp . t)
+   (ditaa . t)				;ditaa を有効化
+   (C . t)				;C/C++/Dを有効化
+   (python . t)				;Python を有効化
+   ))
+
+;; pictureモードの拡張
+;; from http://d.hatena.ne.jp/tamura70/20100125/ditaa
+(add-hook 'picture-mode-hook 'picture-mode-init)
+(autoload 'picture-mode-init "picture-init")
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; org ファイルのはてな記法への変換用
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Emacs起動時にエラーになるのでコメントアウト
 ;;(require 'ox-hatena)
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
