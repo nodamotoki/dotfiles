@@ -296,11 +296,6 @@
   ;;(local-set-key "\C-i" 'tab-to-tab-stop)			;; Tabキーを普通のTabに
   ;;(local-set-key "\M-i" 'c-indent-command)		;; M-iキーをインデントにする
 
-  ;; インデント規則
-  ;; if/for/whileなどの次の行はインデントそのまま。
-  ;;(c-set-offset 'substatement-open 0)
-  ;;(c-set-offset 'comment-intro 0)
-
   ;; 右端で折り返さない
   ;;(setq truncate-lines t)                 ;; 右端で折り返さない cmd:toggle-truncate-lines
   ;;(setq truncate-partial-width-windows t) ;; C-x 3等縦分割ウィンドウで右端で折り返さない
@@ -315,6 +310,14 @@
   ;; styleの選択
   (c-set-style "stroustrup")
   ;;(c-set-style "whitesmith")
+
+  ;; インデント規則 (c-set-style の後に設定する必要がある)
+  ;; if/for/whileなどの次の行はインデントそのまま。
+  ;;(c-set-offset 'substatement-open 0)
+  ;;(c-set-offset 'comment-intro 0)
+  ;; namespace 内ではインデントしない
+  (c-set-offset 'innamespace 0)
+
   )
 
 (add-hook 'c-mode-common-hook 'my-c-mode-common-hook)
@@ -530,6 +533,8 @@
 (ivy-mode 1)
 
 (setq ivy-use-virtual-buffers t)
+(setq enable-recursive-minibuffers t)
+(setq ivy-height 30)
 (setq ivy-count-format "(%d/%d) ")
 
 
@@ -957,7 +962,17 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(c-default-style
+   (quote
+    ((c-mode . "bsd")
+     (c++-mode . "bsd")
+     (java-mode . "java")
+     (awk-mode . "awk"))))
  '(counsel-gtags-auto-update t)
+ '(global-linum-mode t)
+ '(linum-delay t)
+ '(linum-eager nil)
+ '(linum-format "%4d ")
  '(package-selected-packages
    (quote
     (htmlize auto-highlight-symbol ag ggtags neotree avy ivy-hydra hydra ivy counsel-etags counsel-gtags counsel-projectile counsel-pydoc counsel undo-tree package-utils magit jumplist helm-themes helm-swoop helm-rtags helm-migemo helm-gtags helm-flycheck helm-elscreen helm-describe-modes helm-descbinds helm-dash helm-c-moccur helm-bm ace-isearch ac-helm))))

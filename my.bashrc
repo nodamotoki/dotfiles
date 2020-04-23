@@ -22,3 +22,7 @@ export HISTSIZE=10000
 # PATH
 export PATH=~/python:~/local/bin:~/bin:$PATH
 
+# Pygments Plug-in Parser for Gtags
+export GTAGSCONF=~/local/share/gtags/gtags.conf
+export GTAGSLABEL=pygments
+
